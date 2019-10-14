@@ -1,0 +1,6 @@
+# Ignore errors & force download
+# ansible-galaxy install -p ./roles -f -i -r requirements.yml
+
+- src: git@github.com:unclemarc/CGrouper.git
+  version: master
+  scm: git

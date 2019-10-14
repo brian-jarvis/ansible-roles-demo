@@ -1,0 +1,36 @@
+
+---
+- name: setup testing of various variables from the inventory and group
+  hosts: all
+  gather_facts: false
+  become: yes
+  vars:
+    my_cgroups:
+      - name: "firewalld.service"
+        properties:
+          CPUShares: 850
+      - name: "atomic-openshift-node.service"
+        properties:
+          CPUShares: 2048
+          MemoryLimit: 8G
+
+  tasks:
+    - name: Test cgroups-idempotent
+      include_role:
+        name: cgroups-idempotent
+      vars:
+        systemd_adm:
+          name: sshd.service
+          properties:
+            CPUShares: 1024
+            MemoryLimit: 750M
+
+    - name: Set props from a list of objects
+      include_role:
+        name: cgroups-idempotent
+      vars:
+        systemd_adm: "{{ service_manage }}"
+      loop: "{{ my_cgroups }}"
+      loop_control:
+        loop_var: service_manage
+      

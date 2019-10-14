@@ -1,0 +1,5 @@
+roles/CGrouper/
+*.retry
+**/*.retry
+*.pyc
+**/*.pyc

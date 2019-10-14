@@ -1,0 +1,39 @@
+---
+# tasks file for cgroups-idempotent
+
+# verify info passed in
+# expect:
+    # systemd_adm:
+    #   name: sshd.service
+    #   properties:
+    #     CPUShares: 750
+    #     MemoryLimit: 750M
+
+- name: Verify  systemd_adm is defined
+  fail:
+      msg: 'systemd_adm property not defined or is defined incorrectly'
+  when: 
+    - systemd_adm is undefined
+    - systemd_adm.name is undefined
+    - systemd_adm.properties is undefined
+    - systemd_adm.properties | debug_type == "dict"
+
+- name: Get the systemd unit status
+  systemd:
+    name: "{{ systemd_adm.name }}"
+    daemon_reload: yes
+  register: systemctl_out
+
+- name: Verify systemd unit is valid
+  fail:
+    msg: "'Name is invalid, {{ systemd_adm.name }}' is not a valid systemd unit"
+  when: systemctl_out.status.LoadState == "not-found"
+
+- name: Apply systemctl set-property
+  command: "systemctl set-property {{ systemd_adm.name }} {{ prop.key }}={{ prop.value }}"
+  with_dict: "{{ systemd_adm.properties }}"
+  loop_control:
+    label: "{{ systemd_adm.name}} {{ prop }}"
+    loop_var: prop
+  when: prop.value | convert2systemdprop | string != systemctl_out.status[prop.key] | string
+
