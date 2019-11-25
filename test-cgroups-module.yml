@@ -8,28 +8,26 @@
     my_cgroups:
       - name: "firewalld.service"
         properties:
-          CPUShares: 850
+          CPUShares: 975
       - name: "atomic-openshift-node.service"
         properties:
-          CPUShares: 2048
+          CPUShares: 3036
           MemoryLimit: 8G
 
+  roles:
+    - systemctl
   tasks:
-    - name: Test cgroups-idempotent
-      include_role:
-        name: cgroups-idempotent
-      vars:
-        systemd_adm:
+    - name: Test cgroups-module
+      systemctl:
           name: sshd.service
           properties:
-            CPUShares: 1024
-            MemoryLimit: 750M
+            CPUShares: 950
+            MemoryLimit: 850M
 
     # - name: Set props from a list of objects
-    #   include_role:
-    #     name: cgroups-idempotent
-    #   vars:
-    #     systemd_adm: "{{ service_manage }}"
+    #   systemctl:
+    #     name: "{{ service_manage.name }}"
+    #     properties: "{{ service_manage.properties }}"
     #   loop: "{{ my_cgroups }}"
     #   loop_control:
     #     loop_var: service_manage
